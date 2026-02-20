@@ -1,16 +1,55 @@
-# React + Vite
+# ReqForge AI - Intelligent BRD Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**From Chaos to Clarity in Minutes**
 
-Currently, two official plugins are available:
+ReqForge AI automatically generates comprehensive Business Requirements Documents (BRDs) by analyzing emails, meeting transcripts, Slack messages, and documents using advanced AI.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- **Multi-Source Intelligence**: Extracts requirements from emails, meetings, and chat
+- **AI-Powered Generation**: Uses Claude AI for intelligent requirement extraction
+- **Web Scraping**: Enriches BRDs with competitive market intelligence
+- **Conflict Detection**: Identifies and resolves contradictory requirements
+- **Interactive Chat**: Refine BRDs through natural language
+- **3 Template Options**: Comprehensive, Standard, and Agile Quick-Start
+- **Professional Export**: Generate PDF and DOCX documents
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+- **Frontend**: React + Vite + Tailwind CSS
+- **Backend**: Node.js + Express + MongoDB
+- **AI Services**: Python + FastAPI + Claude API
+- **Real-time**: Socket.io WebSockets
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 📦 Installation
+
+See SETUP.md for detailed installation instructions.
+
+Quick start:
+```bash
+# Install dependencies
+cd frontend && npm install && cd ..
+cd backend && npm install && cd ..
+cd ai-services && pip install -r requirements.txt && cd ..
+
+# Run all services
+npm run dev  # In frontend, backend, and ai-services directories
+```
+
+## 🎯 Usage
+
+1. Register/Login
+2. Create New Project
+3. Select Template (Comprehensive/Standard/Agile)
+4. Upload documents or connect data sources
+5. Generate BRD with AI
+6. Refine via chat interface
+7. Export as PDF/DOCX
+
+## 📄 License
+
+MIT License - see LICENSE file
+
+## 👥 Team
+
+Built for HackFest 2.0 by [Your Team Name]

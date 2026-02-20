@@ -1,0 +1,48 @@
+{
+  "name": "Standard BRD",
+  "description": "Mid-level BRD for typical projects",
+  "sections": [
+    {
+      "id": "executive_summary",
+      "title": "Executive Summary",
+      "required": true
+    },
+    {
+      "id": "business_objectives",
+      "title": "Business Objectives",
+      "required": true
+    },
+    {
+      "id": "stakeholders",
+      "title": "Key Stakeholders",
+      "required": true
+    },
+    {
+      "id": "scope",
+      "title": "Scope Definition",
+      "required": true,
+      "subsections": ["in_scope", "out_of_scope", "assumptions"]
+    },
+    {
+      "id": "requirements",
+      "title": "Requirements",
+      "required": true,
+      "subsections": ["functional", "non_functional"]
+    },
+    {
+      "id": "user_stories",
+      "title": "User Stories & Use Cases",
+      "required": false
+    },
+    {
+      "id": "timeline",
+      "title": "Timeline & Deliverables",
+      "required": true
+    },
+    {
+      "id": "success_criteria",
+      "title": "Success Criteria",
+      "required": true
+    }
+  ]
+}

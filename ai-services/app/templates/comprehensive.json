@@ -1,0 +1,91 @@
+{
+  "name": "Comprehensive BRD",
+  "description": "Enterprise-grade BRD with all sections",
+  "sections": [
+    {
+      "id": "executive_summary",
+      "title": "Executive Summary",
+      "required": true,
+      "description": "High-level overview of the project"
+    },
+    {
+      "id": "business_goals",
+      "title": "Business Goals & Objectives",
+      "required": true,
+      "description": "SMART objectives"
+    },
+    {
+      "id": "stakeholders",
+      "title": "Stakeholder Analysis",
+      "required": true,
+      "description": "Key stakeholders and their roles"
+    },
+    {
+      "id": "scope",
+      "title": "Scope and Limitations",
+      "required": true,
+      "subsections": ["in_scope", "out_of_scope", "constraints", "assumptions", "dependencies"]
+    },
+    {
+      "id": "business_process",
+      "title": "Business Process Overview",
+      "required": false,
+      "subsections": ["current_state", "future_state"]
+    },
+    {
+      "id": "functional_requirements",
+      "title": "Functional Requirements",
+      "required": true
+    },
+    {
+      "id": "non_functional_requirements",
+      "title": "Non-Functional Requirements",
+      "required": true
+    },
+    {
+      "id": "data_requirements",
+      "title": "Data Requirements",
+      "required": false
+    },
+    {
+      "id": "integration_requirements",
+      "title": "Integration Requirements",
+      "required": false
+    },
+    {
+      "id": "security_compliance",
+      "title": "Security & Compliance",
+      "required": true
+    },
+    {
+      "id": "timeline",
+      "title": "Timeline & Milestones",
+      "required": true
+    },
+    {
+      "id": "budget",
+      "title": "Budget & Resources",
+      "required": false
+    },
+    {
+      "id": "risks",
+      "title": "Risk Assessment",
+      "required": false
+    },
+    {
+      "id": "success_metrics",
+      "title": "Success Metrics & KPIs",
+      "required": true
+    },
+    {
+      "id": "glossary",
+      "title": "Glossary of Terms",
+      "required": false
+    },
+    {
+      "id": "appendix",
+      "title": "Appendix",
+      "required": false
+    }
+  ]
+}

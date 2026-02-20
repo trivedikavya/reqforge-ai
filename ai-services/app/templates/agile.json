@@ -1,0 +1,64 @@
+{
+  "name": "Agile Quick-Start",
+  "description": "Lightweight BRD for agile teams and startups",
+  "sections": [
+    {
+      "id": "problem_statement",
+      "title": "Problem Statement",
+      "required": true,
+      "description": "What problem are we solving?"
+    },
+    {
+      "id": "goal",
+      "title": "Goal & Expected Outcome",
+      "required": true,
+      "description": "What do we want to achieve?"
+    },
+    {
+      "id": "target_users",
+      "title": "Target Users",
+      "required": true,
+      "description": "Who will use this product?"
+    },
+    {
+      "id": "key_features",
+      "title": "Key Features",
+      "required": true,
+      "subsections": [
+        "must_have",
+        "should_have",
+        "could_have"
+      ],
+      "description": "MoSCoW prioritization"
+    },
+    {
+      "id": "success_metrics",
+      "title": "Success Metrics",
+      "required": true,
+      "description": "How will we measure success?"
+    },
+    {
+      "id": "high_level_scope",
+      "title": "High-Level Scope",
+      "required": true,
+      "description": "What's included and excluded?"
+    },
+    {
+      "id": "timeline",
+      "title": "Timeline & Sprint Planning",
+      "required": true,
+      "description": "Sprint breakdown and milestones"
+    },
+    {
+      "id": "acceptance_criteria",
+      "title": "Acceptance Criteria",
+      "required": true,
+      "description": "Definition of done"
+    }
+  ],
+  "metadata": {
+    "estimated_time": "5-8 minutes",
+    "complexity": "low",
+    "use_cases": ["MVP", "Startups", "Quick iterations", "Proof of concept"]
+  }
+}
