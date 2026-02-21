@@ -1,6 +1,7 @@
 const ChatMessage = require('../models/ChatMessage.model');
 const BRD = require('../models/BRD.model');
 const aiService = require('../services/aiService');
+const scraperService = require('../services/scraper.service');
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
@@ -21,6 +22,32 @@ module.exports = (io) => {
     socket.on('chat-message', async (data) => {
       try {
         const { projectId, message } = data;
+        let aiInputMessage = message;
+        let contextAddition = '';
+
+        // 0. Intercept Web Scraping specific commands
+        if (message.toLowerCase().startsWith('scrape ') || message.toLowerCase().startsWith('/scrape ')) {
+          const urlToScrape = message.split(' ')[1];
+          if (urlToScrape) {
+            // Notify the frontend we're scraping
+            socket.emit('ai-response', {
+              message: `Intercepted scrape request... extracting content from ${urlToScrape}. Please hold.`,
+              suggestions: []
+            });
+
+            try {
+              const scrapedContent = await scraperService.scrapeUrl(urlToScrape);
+              contextAddition = `\n\n[SYSTEM CONTEXT INJECTED FROM SCRAPED URL ${urlToScrape}]:\n${scrapedContent}\n\n[USER INSTRUCTION]: Integrate relevant information from the above scraped context into the BRD. Give me a summary of what you found.`;
+              aiInputMessage = message + contextAddition;
+            } catch (scrapeErr) {
+              socket.emit('ai-response', {
+                message: `Error scraping URL: ${scrapeErr.message}. I will proceed without this context.`,
+                suggestions: []
+              });
+            }
+          }
+        }
+
 
         // 1. Persist the user's message in MongoDB
         await ChatMessage.create({
@@ -29,8 +56,8 @@ module.exports = (io) => {
           content: message
         });
 
-        // 2. Fetch AI response directly via Node (no Python needed)
-        const aiResponse = await aiService.chatWithAI(projectId, message);
+        // 2. Fetch AI response directly via Node, including potential scraped context
+        const aiResponse = await aiService.chatWithAI(projectId, aiInputMessage);
 
         // 3. Persist the assistant's response in MongoDB
         await ChatMessage.create({
@@ -44,13 +71,13 @@ module.exports = (io) => {
         if (aiResponse.brdUpdate) {
           const updatedBrd = await BRD.findOneAndUpdate(
             { projectId },
-            { 
+            {
               content: aiResponse.brdUpdate,
               updatedAt: Date.now()
             },
             { new: true, upsert: true }
           );
-          
+
           // Emit 'brd-updated' with the 'brd' key as expected by ProjectWorkspace.jsx
           io.to(projectId).emit('brd-updated', { brd: updatedBrd });
         }
@@ -74,14 +101,14 @@ module.exports = (io) => {
         const { projectId, suggestion } = data;
 
         const result = await aiService.chatWithAI(
-          projectId, 
-          `Please update the BRD with this suggestion: ${suggestion}`
+          projectId,
+          `Please update the BRD with this suggestion: ${suggestion.text || suggestion}`
         );
 
         if (result.brdUpdate) {
           const updatedBrd = await BRD.findOneAndUpdate(
             { projectId },
-            { 
+            {
               content: result.brdUpdate,
               updatedAt: Date.now()
             },
@@ -90,6 +117,11 @@ module.exports = (io) => {
 
           // Update the UI preview instantly
           io.to(projectId).emit('brd-updated', { brd: updatedBrd });
+
+          socket.emit('ai-response', {
+            message: `Suggestion applied: "${suggestion.text || suggestion}"`,
+            suggestions: []
+          });
         }
       } catch (error) {
         console.error('Suggestion Error:', error);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Sparkles } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../api/axios'
 import { useWebSocket } from '../hooks/useWebSocket'
@@ -25,7 +25,14 @@ export default function ProjectWorkspace() {
     if (socket) {
       socket.on('brd-updated', (data) => {
         setBrd(data.brd)
-        toast.success('BRD updated!')
+        toast.success('BRD instantly updated via AI', {
+          icon: '✨',
+          style: {
+            background: '#1a1a1a',
+            color: '#CCFF00',
+            border: '1px solid rgba(204,255,0,0.2)'
+          }
+        })
       })
 
       return () => {
@@ -61,52 +68,88 @@ export default function ProjectWorkspace() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-deepBlack flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neonGreen"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen bg-deepBlack flex flex-col text-white overflow-hidden">
       <Header />
-      
-      <div className="flex-1 flex flex-col">
-        <div className="bg-white border-b px-4 py-3">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
+
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Workspace Toolbar */}
+        <div className="bg-[#111111] border-b border-white/10 px-4 py-3 shrink-0 relative z-10">
+          <div className="max-w-[1600px] mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
-                  {project?.name || 'Project'}
+                <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                  {project?.name || 'Workspace'}
+                  <span className="text-neonGreen"><Sparkles className="w-4 h-4" /></span>
                 </h1>
-                <p className="text-sm text-gray-500">
-                  {project?.templateType || 'Template'} Template
+                <p className="text-xs text-gray-500 font-mono tracking-wider uppercase mt-0.5">
+                  {project?.templateType || 'Standard'} Mode
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 pointer-events-none">
+                <span className="w-2 h-2 rounded-full bg-neonGreen animate-pulse"></span>
+                <span className="text-xs text-neonGreen font-mono uppercase tracking-wider">Live Sync</span>
+              </div>
+              <div className="h-4 w-px bg-white/10 mx-2"></div>
+              <span className="px-3 py-1 bg-white/5 border border-white/10 text-gray-300 text-xs font-medium rounded-full uppercase tracking-wider">
                 {project?.status || 'draft'}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 grid grid-cols-2 gap-4 p-4 max-w-7xl mx-auto w-full">
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <BRDPreview brd={brd} projectId={id} />
+        {/* Split View Container */}
+        <div className="flex-1 grid grid-cols-2 gap-4 p-4 max-w-[1600px] w-full mx-auto min-h-0">
+
+          {/* Left Panel: BRD Preview */}
+          <div className="bg-[#111111] border border-white/10 rounded-xl overflow-hidden shadow-2xl relative flex flex-col min-h-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-neonGreen/5 to-transparent pointer-events-none z-0" />
+            <div className="relative z-10 flex-1 flex flex-col min-h-0">
+              <BRDPreview brd={brd} projectId={id} />
+            </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <ChatInterface projectId={id} onBRDUpdate={handleBRDUpdate} />
+
+          {/* Right Panel: Chat Interface */}
+          <div className="bg-[#111111] border border-white/10 rounded-xl overflow-hidden shadow-2xl relative flex flex-col min-h-0">
+            <div className="relative z-10 flex-1 flex flex-col min-h-0">
+              <ChatInterface projectId={id} onBRDUpdate={handleBRDUpdate} />
+            </div>
           </div>
+
         </div>
       </div>
+
+      {/* Custom Scrollbar Styles for the Split View */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(204, 255, 0, 0.3);
+        }
+      `}} />
     </div>
   )
 }

@@ -85,21 +85,26 @@ export default function CreateProjectModal({ onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all">
-        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-            {step === 1 ? 'Step 1: Select BRD Template' : 'Step 2: Initial Rough Data'}
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all">
+      <div className="bg-[#111111] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all custom-scrollbar relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-neonGreen/5 to-transparent pointer-events-none z-0 rounded-2xl" />
+
+        <div className="flex justify-between items-center p-6 border-b border-white/10 bg-[#0a0a0a]/50 rounded-t-2xl relative z-10">
+          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 tracking-tight flex items-center gap-3">
+            <span className="text-neonGreen font-mono text-sm tracking-widest uppercase bg-neonGreen/10 px-3 py-1 rounded-md border border-neonGreen/20">
+              Step {step}
+            </span>
+            {step === 1 ? 'Select Architecture' : 'Initial Directives'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-colors"
+            className="p-2 hover:bg-white/5 text-gray-400 hover:text-white rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-8">
+        <div className="p-8 relative z-10 text-gray-300">
           {step === 1 && (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -110,16 +115,16 @@ export default function CreateProjectModal({ onClose, onSuccess }) {
                       setTemplateType(template.id);
                       setStep(2);
                     }}
-                    className={`cursor-pointer rounded-xl p-6 border-2 transition-all duration-300 hover:shadow-xl group
+                    className={`cursor-pointer rounded-xl p-6 border transition-all duration-300 hover:shadow-2xl group
                       ${templateType === template.id
-                        ? 'border-blue-500 bg-blue-50/50 shadow-md transform scale-[1.02]'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`}
+                        ? 'border-neonGreen bg-neonGreen/5 shadow-[0_0_20px_rgba(204,255,0,0.1)] transform scale-[1.02]'
+                        : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
                   >
-                    <div className="mb-4 text-blue-600 group-hover:scale-110 transition-transform">
+                    <div className={`mb-4 transition-transform group-hover:scale-110 ${templateType === template.id ? 'text-neonGreen' : 'text-gray-400 group-hover:text-white'}`}>
                       <Sparkles className="w-8 h-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{template.name}</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">{template.description}</p>
+                    <h3 className={`text-xl font-bold mb-2 tracking-wide ${templateType === template.id ? 'text-white' : 'text-gray-300'}`}>{template.name}</h3>
+                    <p className="text-gray-500 text-sm leading-relaxed">{template.description}</p>
                   </div>
                 ))}
               </div>
@@ -131,28 +136,28 @@ export default function CreateProjectModal({ onClose, onSuccess }) {
 
               <div className="flex flex-wrap gap-4 items-center mb-6">
                 {/* Functional Buttons */}
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all text-sm font-medium">
-                  <Upload className="w-4 h-4" /> Upload Data
+                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-white/10 hover:text-white transition-all text-sm font-medium">
+                  <Upload className="w-4 h-4" /> Upload Context
                 </button>
                 <button
                   onClick={handleDemoData}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-100 hover:shadow-sm transition-all text-sm font-medium"
+                  className="flex items-center gap-2 px-4 py-2 bg-neonGreen/10 border border-neonGreen/20 text-neonGreen rounded-lg hover:bg-neonGreen/20 transition-all text-sm font-medium uppercase tracking-wider"
                 >
-                  ✨ Go with Demo
+                  <Sparkles className="w-4 h-4" /> Load Demo Data
                 </button>
 
-                <div className="h-8 w-px bg-gray-200 mx-2"></div>
+                <div className="h-8 w-px bg-white/10 mx-2"></div>
 
                 {/* Pending Buttons */}
                 <ComingSoonTooltip>
-                  <button disabled className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-400 rounded-lg cursor-not-allowed text-sm font-medium">
+                  <button disabled className="flex items-center gap-2 px-4 py-2 bg-[#0a0a0a] border border-white/5 text-gray-600 rounded-lg cursor-not-allowed text-sm font-medium">
                     <Mail className="w-4 h-4" /> Gmail Sync
                   </button>
                 </ComingSoonTooltip>
 
                 <ComingSoonTooltip>
-                  <button disabled className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 text-gray-400 rounded-lg cursor-not-allowed text-sm font-medium">
-                    <Hash className="w-4 h-4" /> Slack/Discord
+                  <button disabled className="flex items-center gap-2 px-4 py-2 bg-[#0a0a0a] border border-white/5 text-gray-600 rounded-lg cursor-not-allowed text-sm font-medium">
+                    <Hash className="w-4 h-4" /> Comm Sync
                   </button>
                 </ComingSoonTooltip>
               </div>
@@ -161,32 +166,32 @@ export default function CreateProjectModal({ onClose, onSuccess }) {
                 <textarea
                   value={initialData}
                   onChange={(e) => setInitialData(e.target.value)}
-                  placeholder="Describe your project requirements, features, goals, or paste your rough notes here..."
+                  placeholder="Describe your project requirements, target audience, objectives..."
                   rows={10}
-                  className="w-full px-4 py-4 text-gray-700 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none shadow-inner"
+                  className="w-full px-5 py-5 bg-[#0a0a0a] text-white border border-white/10 rounded-xl focus:ring-1 focus:ring-neonGreen focus:border-neonGreen transition-all resize-none placeholder:text-gray-600 custom-scrollbar"
                 />
               </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+              <div className="flex justify-between items-center pt-6 border-t border-white/10">
                 <button
                   onClick={() => setStep(1)}
-                  className="px-6 py-2.5 text-gray-600 font-medium hover:text-gray-900 transition-colors"
+                  className="px-6 py-2.5 text-gray-500 font-medium hover:text-white transition-colors"
                 >
-                  ← Back to Templates
+                  ← Rethink Architecture
                 </button>
                 <button
                   onClick={handleLetsGo}
                   disabled={loading}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg hover:scale-105 disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                  className="px-8 py-3 bg-neonGreen text-deepBlack font-bold rounded-xl hover:bg-[#b0d900] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(204,255,0,0.2)] hover:shadow-[0_0_30px_rgba(204,255,0,0.4)] flex items-center gap-2 uppercase tracking-wider"
                 >
                   {loading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Generating Magic...
+                      <div className="w-5 h-5 border-2 border-deepBlack/30 border-t-deepBlack rounded-full animate-spin" />
+                      Initializing Forge...
                     </>
                   ) : (
                     <>
-                      Let's Go <Sparkles className="w-5 h-5" />
+                      Execute Sequence <Sparkles className="w-5 h-5" />
                     </>
                   )}
                 </button>
