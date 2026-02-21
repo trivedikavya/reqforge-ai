@@ -1,6 +1,9 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const Project = require('../models/Project.model');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
 
 const storage = multer.diskStorage({
   destination: './uploads/',
@@ -30,23 +33,49 @@ exports.uploadFiles = (req, res) => {
     }
 
     try {
-      const files = req.files.map(f => ({
-        filename: f.filename,
-        originalname: f.originalname,
-        path: f.path,
-        size: f.size,
-        uploadedAt: new Date()
-      }));
+      const processedFiles = [];
 
-      if (req.body.projectId) {
-        await Project.findByIdAndUpdate(req.body.projectId, {
-          $push: { 'dataSources.uploads': { $each: files } }
+      for (const f of req.files) {
+        let extractedText = null;
+        const filePath = f.path;
+        const ext = path.extname(f.originalname).toLowerCase();
+
+        try {
+          if (ext === '.txt' || ext === '.json') {
+            extractedText = fs.readFileSync(filePath, 'utf8');
+          } else if (ext === '.pdf') {
+            const dataBuffer = fs.readFileSync(filePath);
+            const pdfData = await pdfParse(dataBuffer);
+            extractedText = pdfData.text;
+          } else if (ext === '.docx') {
+            const docxData = await mammoth.extractRawText({ path: filePath });
+            extractedText = docxData.value;
+          }
+        } catch (extractErr) {
+          console.error(`Failed to extract text from ${f.originalname}:`, extractErr);
+          // Fallback if extraction fails
+          extractedText = `[Extraction failed for ${f.originalname}]`;
+        }
+
+        processedFiles.push({
+          filename: f.filename,
+          originalname: f.originalname,
+          path: filePath,
+          size: f.size,
+          extractedText: extractedText,
+          uploadedAt: new Date()
         });
       }
 
-      res.json({ 
-        success: true, 
-        files: files.map(f => ({
+      if (req.body.projectId) {
+        await Project.findByIdAndUpdate(req.body.projectId, {
+          $push: { 'dataSources.uploads': { $each: processedFiles } }
+        });
+      }
+
+      res.json({
+        success: true,
+        files: processedFiles.map(f => ({
           filename: f.filename,
           originalname: f.originalname,
           size: f.size

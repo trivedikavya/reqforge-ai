@@ -42,7 +42,103 @@ export default function CreateProjectModal({ onClose, onSuccess }) {
   ]
 
   const handleDemoData = () => {
-    setInitialData("We are building an e-commerce platform for selling organic dog food. It needs a user-facing storefront with a product catalog, shopping cart, and checkout process using Stripe. Users should be able to create accounts, track orders, and save payment methods. The admin dashboard must allow managers to add/edit products, track inventory, and view sales reports. We also need a subscription model where users get dog food delivered monthly.");
+    let demoText = "";
+    if (templateType === 'agile') {
+      demoText = `We are building a new internal tool called "Pulse" for asynchronous team check-ins. The goal is to replace daily standup meetings that take too long and disrupt deep work. 
+      
+User Personas:
+1. "Maker" (Software Engineers, Designers): Needs a fast, distraction-free way to log what they did yesterday, what they are doing today, and any blockers. They prefer Slack integrations over another web portal.
+2. "Manager" (Engineering Managers, Product Owners): Needs a high-level summary dashboard to see team progress, identify bottlenecks quickly, and ensure sprints are on track without micromanaging.
+
+Key Epics & Stories:
+Epic 1: Slack Integration
+- As a Maker, I want to receive an automated DM from Pulse at 9:00 AM local time, so I am prompted to submit my check-in.
+- As a Maker, I want to reply directly to the Slack DM with my update, so I don't have to leave my workflow.
+- As a Manager, I want to type "/pulse status @team" to instantly see who has and hasn't checked in.
+
+Epic 2: The Action Dashboard
+- As a Manager, I want a web dashboard that aggregates all check-ins by team, sortable by "Blocked" status, so I can immediately help unblock my team members.
+- As a Maker, I want to view my team's check-ins in a single feed, so I know what others are working on.
+
+Acceptance Criteria: 
+The system must support rich text in Slack replies (emojis, lists). The web dashboard must load the feed for a 20-person team in under 1 second. Managers must be able to export weekly summaries to PDF.
+
+Sprint Roadmap:
+Sprint 1: Core Slack bot setup, user authentication mapping.
+Sprint 2: Daily automated prompts and listening for replies.
+Sprint 3: Web dashboard MVP (read-only feed).
+Sprint 4: Manager specific views and export functionality.`;
+
+    } else if (templateType === 'standard') {
+      demoText = `Project Name: NextGen Retail Inventory Optimization System (N-RIOS)
+
+Executive Summary:
+Our mid-sized retail chain, "Urban Elements," currently operates 45 physical locations and a growing e-commerce storefront. We are struggling with frequent stockouts on popular items and overstocking of low-velocity goods. We need a centralized Inventory Optimization System (N-RIOS) to intelligently forecast demand, automate reorder workflows, and provide real-time visibility across all warehouses and stores.
+
+Project Objectives (S.M.A.R.T):
+- Specific: Implement a cloud-based inventory management system integrated with our existing Shopify e-commerce and point-of-sale (POS) systems.
+- Measurable: Reduce stockouts of top-100 SKUs by 40% and decrease overall excess inventory holding costs by 15% within the first 6 months.
+- Attainable: Utilize commercial-off-the-shelf (COTS) software solutions rather than building from scratch.
+- Relevant: Aligns directly with the Q3 strategic priority to improve gross margins and customer satisfaction.
+- Time-bound: Full deployment and staff training completed within 4 months (120 days) from project kick-off.
+
+Needs Statement:
+Without N-RIOS, our purchasing team relies on fragmented Excel spreadsheets, leading to human error and delayed reordering. This results in lost revenue from unfulfilled online orders and ties up capital in dead stock.
+
+Project Scope:
+The scope includes integrating the new software with Shopify (online) and our physical cash registers. We will deliver advanced reporting dashboards for executives and automated purchase order generation for buyers. Scope explicitly excludes changes to our physical logistics and shipping providers.
+
+Current vs Proposed Process:
+As-Is: Store managers email weekly inventory reports to HQ. Buyers manually consolidate these into a master spreadsheet and guess order quantities.
+To-Be: POS terminals automatically deduct inventory upon sale. The system detects when an item crosses the minimum threshold and auto-drafts a purchase order for the buyer's approval.
+
+Project Requirements:
+1. Real-time syncing with POS within 5 minutes of a transaction.
+2. Demand forecasting module utilizing historical sales data and seasonal trends.
+3. Multi-warehouse support, tracking inventory in transit between locations.
+4. Role-based access control (Store Manager vs HQ Buyer vs Executive).
+
+Stakeholders:
+- Sarah Jenkins (VP of Operations) - Project Sponsor
+- Marcus Chen (Lead Buyer) - Core User
+- IT Deployment Team - Implementation
+
+Project Schedule:
+Month 1: Vendor Selection and Database Schema Mapping.
+Month 2: API Integration with Shopify and POS.
+Month 3: Pilot testing in 3 physical locations.
+Month 4: Full rollout and user training.
+
+Cost-Benefit Analysis:
+Estimated initial software and integration cost: $85,000. Expected annual savings from reduced holding costs and recovered lost sales: $240,000. ROI expected within 5 months post-launch.`;
+
+    } else {
+      demoText = `Global Enterprise Microservices Migration (Project: Phoenix)
+
+Overview:
+"FinTech Global" currently operates a monolithic banking application handling 2 million daily transactions. The legacy architecture, built on a single massive SQL database and tightly coupled application servers, is impeding our ability to release new features quickly. We are initiating "Project Phoenix" to migrate our core banking, user profile, and transaction ledgers to a cloud-native, microservices architecture on AWS.
+
+Governance & Oversight:
+The project will be governed by the Enterprise Architecture Review Board (EARB). All architectural decisions, API contracts, and database splits must be documented in Confluence and receive formal sign-off from the Chief Information Security Officer (CISO) and the VP of Engineering. Weekly steering committee meetings will track progress against the $5.2M allocated budget.
+
+Regulatory Compliance:
+As a financial institution, the new architecture must maintain strict compliance with PCI-DSS for payment processing and GDPR/CCPA for user data privacy. Data masking must be explicitly implemented for all non-production environments. The system must support immutable audit logging for every ledger transaction, retaining logs in Amazon S3 standard-IA for 7 years to satisfy SEC regulations.
+
+Security Protocols:
+Zero Trust networking must be applied between all microservices using a service mesh (e.g., Istio). Service-to-service communication will occur exclusively over mutual TLS (mTLS). An API Gateway will handle all external ingress, strictly enforcing OAuth 2.0 with JWT tokens. Rate limiting and Web Application Firewalls (WAF) must be configured to prevent DDoS attacks.
+
+Risk Mitigation:
+- Risk 1 (Downtime): We cannot afford a "big bang" release. Mitigation: Implement the Strangler Fig pattern. We will route 5% of traffic to the new microservices, validate, and incrementally increase.
+- Risk 2 (Data Inconsistency): Dual-writing between the legacy monolithic DB and the new distributed databases could lead to race conditions. Mitigation: Use Event Sourcing and an event bus (Kafka) to ensure eventual consistency, heavily monitored by Datadog.
+
+Data Migration Plan:
+Phase 1 involves migrating static reference data (e.g., branch locations, fee structures). Phase 2 involves migrating active User Profiles. We will perform offline bulk extracts, sanitization, and loads into Amazon DynamoDB. The final phase involves the highly complex ledger data, which requires a real-time CDC (Change Data Capture) pipeline using Debezium to keep the legacy and new systems perfectly synchronized until the cutover.
+
+Vendor Requirements:
+We require AWS Enterprise Support. Furthermore, the migration of the ledger database requires specialized consultants. We will issue an RFP for an implementation partner with proven experience in banking microservices, requiring a minimum of three relevant case studies and SOC2 Type II certification.`;
+    }
+
+    setInitialData(demoText);
   }
 
   const handleLetsGo = async () => {

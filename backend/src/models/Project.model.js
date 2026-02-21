@@ -28,8 +28,10 @@ const projectSchema = new mongoose.Schema({
   dataSources: {
     uploads: [{
       filename: String,
+      originalname: String,
       path: String,
       size: Number,
+      extractedText: String,
       uploadedAt: Date
     }]
   },

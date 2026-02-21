@@ -1,34 +1,34 @@
-const { Document, Packer, Paragraph, TextRun, HeadingLevel } = require('docx');
+const HTMLToDOCX = require('html-to-docx');
+const { marked } = require('marked');
 
 class DOCXService {
   async generateDOCX(brd) {
-    const sections = [{
-      children: [
-        new Paragraph({
-          text: 'Business Requirements Document',
-          heading: HeadingLevel.HEADING_1
-        }),
-        new Paragraph({ text: '' })
-      ]
-    }];
+    try {
+      // Convert Markdown to HTML
+      const mdContent = typeof brd.content === 'object' ? JSON.stringify(brd.content) : brd.content;
+      const htmlContent = marked.parse(mdContent || '# No Content');
 
-    if (brd.content) {
-      Object.entries(brd.content).forEach(([key, section]) => {
-        sections[0].children.push(
-          new Paragraph({
-            text: key.replace(/_/g, ' ').toUpperCase(),
-            heading: HeadingLevel.HEADING_2
-          }),
-          new Paragraph({
-            text: typeof section === 'object' ? JSON.stringify(section, null, 2) : section
-          }),
-          new Paragraph({ text: '' })
-        );
+      // Add a professional title and wrapper to the HTML block
+      const finalHtml = `
+      <div style="font-family: Arial, sans-serif;">
+        <h1 style="text-align: center; color: #2c3e50;">Business Requirements Document</h1>
+        <hr />
+        ${htmlContent}
+      </div>
+      `;
+
+      // Convert the HTML straight to a DOCX Buffer
+      const docxBuffer = await HTMLToDOCX(finalHtml, null, {
+        table: { row: { cantSplit: true } },
+        footer: true,
+        pageNumber: true,
       });
-    }
 
-    const doc = new Document({ sections });
-    return await Packer.toBuffer(doc);
+      return docxBuffer;
+    } catch (error) {
+      console.error("DOCX Generation Error:", error);
+      throw error;
+    }
   }
 }
 
