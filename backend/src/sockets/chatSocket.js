@@ -1,11 +1,12 @@
 const ChatMessage = require('../models/ChatMessage.model');
-const pythonService = require('../services/pythonService');
 const BRD = require('../models/BRD.model');
+const aiService = require('../services/aiService');
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log('✅ Client connected:', socket.id);
 
+    // Join room for specific project updates
     socket.on('join-project', (projectId) => {
       socket.join(projectId);
       console.log(`Socket ${socket.id} joined project ${projectId}`);
@@ -16,83 +17,82 @@ module.exports = (io) => {
       console.log(`Socket ${socket.id} left project ${projectId}`);
     });
 
+    // Main chat message handler
     socket.on('chat-message', async (data) => {
       try {
         const { projectId, message } = data;
 
-        // Save user message
+        // 1. Persist the user's message in MongoDB
         await ChatMessage.create({
           projectId,
           role: 'user',
           content: message
         });
 
-        // Get AI response from Python service
-        const aiResponse = await pythonService.chatWithAI({
-          project_id: projectId,
-          message: message
-        });
+        // 2. Fetch AI response directly via Node (no Python needed)
+        const aiResponse = await aiService.chatWithAI(projectId, message);
 
-        // Save AI response
+        // 3. Persist the assistant's response in MongoDB
         await ChatMessage.create({
           projectId,
           role: 'assistant',
           content: aiResponse.message,
-          suggestions: aiResponse.suggestions
+          suggestions: aiResponse.suggestions || []
         });
 
-        // Update BRD if needed
-        if (aiResponse.brd_update) {
-          await BRD.findOneAndUpdate(
+        // 4. Update the BRD document if changes were generated
+        if (aiResponse.brdUpdate) {
+          const updatedBrd = await BRD.findOneAndUpdate(
             { projectId },
             { 
-              content: aiResponse.brd_update,
+              content: aiResponse.brdUpdate,
               updatedAt: Date.now()
             },
-            { upsert: true }
+            { new: true, upsert: true }
           );
+          
+          // Emit 'brd-updated' with the 'brd' key as expected by ProjectWorkspace.jsx
+          io.to(projectId).emit('brd-updated', { brd: updatedBrd });
         }
 
-        // Send response back
+        // 5. Respond back to the sender
         socket.emit('ai-response', {
           message: aiResponse.message,
-          suggestions: aiResponse.suggestions,
-          brdUpdate: aiResponse.brd_update
+          suggestions: aiResponse.suggestions || [],
+          brdUpdate: aiResponse.brdUpdate
         });
 
       } catch (error) {
-        console.error('Chat error:', error);
-        socket.emit('error', { message: 'Failed to process message' });
+        console.error('Socket Chat Error:', error);
+        socket.emit('error', { message: 'Failed to process AI request' });
       }
     });
 
+    // Logic for applying AI suggestions
     socket.on('accept-suggestion', async (data) => {
       try {
         const { projectId, suggestion } = data;
 
-        const result = await pythonService.chatWithAI({
-          project_id: projectId,
-          message: `Apply this suggestion: ${JSON.stringify(suggestion)}`
-        });
+        const result = await aiService.chatWithAI(
+          projectId, 
+          `Please update the BRD with this suggestion: ${suggestion}`
+        );
 
-        if (result.brd_update) {
-          const brd = await BRD.findOneAndUpdate(
+        if (result.brdUpdate) {
+          const updatedBrd = await BRD.findOneAndUpdate(
             { projectId },
             { 
-              content: result.brd_update,
+              content: result.brdUpdate,
               updatedAt: Date.now()
             },
             { new: true, upsert: true }
           );
 
-          socket.emit('brd-updated', {
-            brd,
-            changes: 'Suggestion applied'
-          });
+          // Update the UI preview instantly
+          io.to(projectId).emit('brd-updated', { brd: updatedBrd });
         }
-
       } catch (error) {
-        console.error('Suggestion error:', error);
+        console.error('Suggestion Error:', error);
         socket.emit('error', { message: 'Failed to apply suggestion' });
       }
     });

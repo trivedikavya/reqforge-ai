@@ -2,7 +2,70 @@ const BRD = require('../models/BRD.model');
 const Project = require('../models/Project.model');
 const pdfService = require('../services/pdfService');
 const docxService = require('../services/docxService');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+// Initialize Gemini AI with your API Key
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+/**
+ * NEW: Generates a BRD using Gemini AI based on user template and data
+ */
+exports.generateBRD = async (req, res) => {
+  try {
+    const { projectId, templateType, initialData } = req.body;
+
+    // 1. Verify the project exists
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    // 2. Prepare the prompt for Gemini
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const prompt = `
+      Act as an expert Business Analyst. Generate a professional ${templateType} 
+      Business Requirements Document (BRD) based on this input:
+      
+      "${initialData}"
+      
+      Please include the following sections:
+      - Executive Summary
+      - Project Objectives
+      - User Stories
+      - Functional & Non-Functional Requirements
+      - Technical Constraints
+      
+      Format the output in clear Markdown.
+    `;
+
+    // 3. Call Gemini API
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const generatedContent = response.text();
+
+    // 4. Save or Update the BRD in MongoDB
+    const brd = await BRD.findOneAndUpdate(
+      { projectId: projectId },
+      {
+        content: generatedContent,
+        updatedAt: Date.now()
+      },
+      { new: true, upsert: true } // Creates it if it doesn't exist
+    );
+
+    // 5. Update the Project status
+    await Project.findByIdAndUpdate(projectId, { status: 'completed' });
+
+    res.json({ success: true, brd });
+  } catch (error) {
+    console.error('AI Generation Error:', error);
+    res.status(500).json({ error: 'Failed to generate BRD with AI' });
+  }
+};
+
+/**
+ * EXISTING: Fetches the BRD for a specific project
+ */
 exports.getBRD = async (req, res) => {
   try {
     const project = await Project.findOne({
@@ -15,7 +78,7 @@ exports.getBRD = async (req, res) => {
     }
 
     const brd = await BRD.findOne({ projectId: req.params.projectId });
-    
+
     if (!brd) {
       return res.status(404).json({ error: 'BRD not generated yet' });
     }
@@ -27,6 +90,9 @@ exports.getBRD = async (req, res) => {
   }
 };
 
+/**
+ * EXISTING: Manually updates BRD content (used by the Chat interface)
+ */
 exports.updateBRD = async (req, res) => {
   try {
     const brd = await BRD.findOneAndUpdate(
@@ -42,6 +108,9 @@ exports.updateBRD = async (req, res) => {
   }
 };
 
+/**
+ * EXISTING: Exports the BRD to PDF or DOCX
+ */
 exports.exportBRD = async (req, res) => {
   try {
     const { format } = req.body;
