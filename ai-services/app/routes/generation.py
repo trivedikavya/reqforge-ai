@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Optional
-from app.services.claude_service import claude_service
+from app.services.gemini_service import gemini_service
 from app.services.template_service import template_service
 import json
 
@@ -18,7 +18,7 @@ class GenerateBRDResponse(BaseModel):
 
 @router.post("/generate", response_model=GenerateBRDResponse)
 async def generate_brd(request: GenerateBRDRequest):
-    """Generate initial BRD from data sources"""
+    """Generate initial BRD from data sources using Gemini"""
     try:
         # Load template structure
         template_structure = template_service.load_template(request.template)
@@ -26,9 +26,8 @@ async def generate_brd(request: GenerateBRDRequest):
         # Format data sources
         formatted_data = format_data_sources(request.data_sources)
         
-        # Generate BRD with Claude
-        prompt = f"""
-You are an expert Business Analyst. Generate a comprehensive Business Requirements Document (BRD) from the following data sources.
+        # Generate BRD with Gemini
+        prompt = f"""You are an expert Business Analyst. Generate a comprehensive Business Requirements Document (BRD) from the following data sources.
 
 DATA SOURCES:
 {formatted_data}
@@ -43,24 +42,38 @@ INSTRUCTIONS:
 4. Identify any conflicting requirements
 5. For each section, provide clear, professional content
 
-Generate the BRD content as a JSON object with keys matching the template structure.
-"""
+Return the BRD as a JSON object with keys matching the section IDs from the template structure.
+Each section should contain:
+- "title": The section title
+- "content": The actual content for that section (as a string)
+- "completed": boolean indicating if the section has content
+
+Example format:
+{{
+  "executive_summary": {{
+    "title": "Executive Summary",
+    "content": "This project aims to...",
+    "completed": true
+  }},
+  "business_goals": {{
+    "title": "Business Goals & Objectives",
+    "content": "1. Increase revenue by 40%\\n2. Launch by Q3 2024",
+    "completed": true
+  }}
+}}
+
+Generate the complete BRD now."""
         
-        response = await claude_service.generate_content(prompt, max_tokens=4000)
+        # Use JSON-specific method
+        brd_content = await gemini_service.generate_content_with_json(prompt, max_tokens=4000)
         
-        # Parse response
-        try:
-            brd_content = json.loads(response)
-        except:
-            # If not valid JSON, create structured response
-            brd_content = {
-                "executive_summary": response[:500],
-                "raw_content": response
-            }
+        # Ensure proper structure
+        if not isinstance(brd_content, dict):
+            brd_content = {"raw_content": str(brd_content)}
         
         return GenerateBRDResponse(
             brd_content=brd_content,
-            message="BRD generated successfully"
+            message="BRD generated successfully using Gemini AI"
         )
         
     except Exception as e:
@@ -72,7 +85,8 @@ def format_data_sources(data_sources: Dict) -> str:
     
     if "emails" in data_sources:
         formatted.append("=== EMAILS ===")
-        for email in data_sources["emails"][:20]:
+        emails = data_sources["emails"][:20] if isinstance(data_sources["emails"], list) else []
+        for email in emails:
             formatted.append(f"From: {email.get('from', 'Unknown')}")
             formatted.append(f"Subject: {email.get('subject', 'No subject')}")
             formatted.append(f"Body: {email.get('body', '')[:300]}")
@@ -80,14 +94,16 @@ def format_data_sources(data_sources: Dict) -> str:
     
     if "meetings" in data_sources:
         formatted.append("\n=== MEETING TRANSCRIPTS ===")
-        for meeting in data_sources["meetings"][:10]:
+        meetings = data_sources["meetings"][:10] if isinstance(data_sources["meetings"], list) else []
+        for meeting in meetings:
             formatted.append(f"Meeting: {meeting.get('meeting_id', 'Unknown')}")
             formatted.append(f"Transcript: {meeting.get('transcript', '')[:500]}")
             formatted.append("---")
     
     if "slack" in data_sources:
         formatted.append("\n=== SLACK MESSAGES ===")
-        for msg in data_sources["slack"][:30]:
+        slack = data_sources["slack"][:30] if isinstance(data_sources["slack"], list) else []
+        for msg in slack:
             formatted.append(f"[{msg.get('user', 'Unknown')}]: {msg.get('text', '')}")
     
     return "\n".join(formatted)

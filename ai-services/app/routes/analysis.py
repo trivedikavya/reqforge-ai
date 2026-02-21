@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict
-from app.services.claude_service import claude_service
+from app.services.gemini_service import gemini_service
+import json
 
 router = APIRouter()
 
@@ -21,33 +22,71 @@ class ConflictResponse(BaseModel):
 
 @router.post("/conflicts", response_model=ConflictResponse)
 async def detect_conflicts(request: ConflictRequest):
-    """Detect conflicts in BRD requirements"""
+    """Detect conflicts in BRD requirements using Gemini"""
     try:
-        prompt = f"""
-Analyze this BRD content for conflicting requirements:
+        prompt = f"""Analyze this Business Requirements Document for conflicts, contradictions, and inconsistencies:
 
-{request.brd_content}
+BRD CONTENT:
+{json.dumps(request.brd_content, indent=2)}
 
-Identify any contradictions, inconsistencies, or conflicting statements.
-For each conflict, provide:
-1. Type (timeline, scope, budget, technical, etc.)
-2. Description
-3. Resolution options
+Look for conflicts in:
+1. Timeline conflicts (different deadlines, conflicting schedules)
+2. Scope conflicts (feature required in one place, out of scope in another)
+3. Budget conflicts (different amounts mentioned)
+4. Technical conflicts (incompatible technologies or approaches)
+5. Stakeholder conflicts (different requirements from different stakeholders)
 
-Return as JSON array of conflicts.
-"""
+For each conflict found, provide:
+- id: unique identifier
+- type: category of conflict
+- description: clear explanation
+- sources: which sections conflict
+- resolution_options: 2-3 ways to resolve
+
+Return ONLY valid JSON array:
+[
+  {{
+    "id": "conf_001",
+    "type": "timeline_conflict",
+    "description": "Section A requires Q2 launch but Section B needs 6 months (Q3)",
+    "sources": ["executive_summary", "timeline"],
+    "resolution_options": [
+      {{"option": "Reduce scope for Q2 MVP", "impact": "Lower initial features"}},
+      {{"option": "Extend to Q3", "impact": "Delayed market entry"}}
+    ]
+  }}
+]
+
+If NO conflicts found, return: []"""
         
-        response = await claude_service.generate_content(prompt)
-        
-        import json
         try:
-            conflicts = json.loads(response)
-            if isinstance(conflicts, list):
-                conflicts = {"conflicts": conflicts}
-        except:
-            conflicts = {"conflicts": []}
-        
-        return ConflictResponse(**conflicts)
+            result = await gemini_service.generate_content_with_json(prompt, max_tokens=2000)
+            
+            # Handle different response formats
+            if isinstance(result, list):
+                conflicts_data = result
+            elif isinstance(result, dict) and 'conflicts' in result:
+                conflicts_data = result['conflicts']
+            else:
+                conflicts_data = []
+            
+            # Convert to Conflict objects
+            conflicts = []
+            for idx, conflict in enumerate(conflicts_data):
+                if isinstance(conflict, dict):
+                    conflicts.append(Conflict(
+                        id=conflict.get('id', f'conf_{idx+1:03d}'),
+                        type=conflict.get('type', 'general'),
+                        description=conflict.get('description', 'Conflict detected'),
+                        sources=conflict.get('sources', []),
+                        resolution_options=conflict.get('resolution_options', [])
+                    ))
+            
+            return ConflictResponse(conflicts=conflicts)
+            
+        except json.JSONDecodeError:
+            # If parsing fails, return empty conflicts
+            return ConflictResponse(conflicts=[])
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
