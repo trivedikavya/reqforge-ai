@@ -38,7 +38,7 @@ export default function Register() {
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_0_15px_rgba(204,255,0,0.15)] relative overflow-hidden group">
               <div className="absolute inset-0 bg-neonGreen/10 group-hover:bg-neonGreen/20 transition-colors" />
-              <span className="text-3xl font-black text-white relative z-10 font-mono tracking-tighter">R</span>
+              <img src="/favicon.svg" alt="ReqForge Logo" className="w-10 h-10 relative z-10 drop-shadow-[0_0_15px_rgba(204,255,0,0.3)] group-hover:scale-110 transition-transform" />
             </div>
           </div>
           <h1 className="text-3xl font-bold text-white tracking-widest uppercase">Create Access</h1>

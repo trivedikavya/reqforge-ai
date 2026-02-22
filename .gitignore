@@ -44,3 +44,4 @@ uploads/*
 .cache/
 temp/
 tmp/
+uploads/

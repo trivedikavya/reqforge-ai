@@ -27,9 +27,7 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 border-2 border-neonGreen rounded-lg flex items-center justify-center bg-deepBlack/50 shadow-[0_0_15px_rgba(204,255,0,0.3)]">
-                  <span className="text-neonGreen font-bold text-xl">R</span>
-                </div>
+                <img src="/favicon.svg" alt="ReqForge Logo" className="w-10 h-10 drop-shadow-[0_0_15px_rgba(204,255,0,0.3)] hover:scale-105 transition-transform" />
                 <span className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
                   ReqForge <span className="text-neonGreen">AI</span>
                 </span>
@@ -249,9 +247,7 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 border-2 border-neonGreen rounded-lg flex items-center justify-center">
-                  <span className="text-neonGreen font-bold text-sm">R</span>
-                </div>
+                <img src="/favicon.svg" alt="ReqForge Logo" className="w-8 h-8 hover:scale-105 transition-transform" />
                 <span className="font-bold text-white tracking-widest">REQFORGE <span className="text-neonGreen">AI</span></span>
               </div>
               <p className="text-gray-500 text-sm">

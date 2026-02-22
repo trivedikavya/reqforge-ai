@@ -9,9 +9,7 @@ export default function Header({ onLogout }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-neonGreen shadow-[0_0_10px_rgba(204,255,0,0.2)] bg-deepBlack/50">
-              <span className="text-neonGreen font-bold font-mono">R</span>
-            </div>
+            <img src="/favicon.svg" alt="ReqForge Logo" className="w-8 h-8 drop-shadow-[0_0_10px_rgba(204,255,0,0.2)] hover:scale-105 transition-transform" />
             <span className="text-xl font-bold text-white tracking-widest flex items-center gap-2">
               REQFORGE <span className="text-neonGreen">AI</span>
             </span>
