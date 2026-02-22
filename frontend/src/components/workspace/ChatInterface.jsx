@@ -179,25 +179,16 @@ export default function ChatInterface({ projectId, onBRDUpdate }) {
               <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
 
               {msg.suggestions && msg.suggestions.length > 0 && (
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {msg.suggestions.map((sug, i) => (
-                    <div
+                    <button
                       key={i}
-                      className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-neonGreen/30 transition-colors"
+                      onClick={() => handleSuggestionAccept(sug)}
+                      className="px-3 py-2 bg-neonGreen/10 text-neonGreen text-xs rounded-xl hover:bg-neonGreen/20 border border-neonGreen/20 transition-colors flex items-center gap-2 text-left shadow-sm"
                     >
-                      <p className="text-sm text-gray-300 mb-3">{sug.text}</p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleSuggestionAccept(sug)}
-                          className="px-4 py-1.5 bg-neonGreen/10 text-neonGreen text-xs font-bold rounded-lg hover:bg-neonGreen/20 border border-neonGreen/20 transition-colors uppercase tracking-wider flex-1"
-                        >
-                          Accept
-                        </button>
-                        <button className="px-4 py-1.5 bg-red-500/10 text-red-400 text-xs font-bold rounded-lg hover:bg-red-500/20 border border-red-500/20 transition-colors uppercase tracking-wider flex-1">
-                          Reject
-                        </button>
-                      </div>
-                    </div>
+                      <Sparkles className="w-3 h-3 shrink-0" />
+                      <span className="leading-snug">{typeof sug === 'string' ? sug : sug.text}</span>
+                    </button>
                   ))}
                 </div>
               )}

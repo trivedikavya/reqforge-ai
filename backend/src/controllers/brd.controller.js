@@ -2,10 +2,8 @@ const BRD = require('../models/BRD.model');
 const Project = require('../models/Project.model');
 const pdfService = require('../services/pdfService');
 const docxService = require('../services/docxService');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-// Initialize Gemini AI with your API Key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const aiService = require('../services/aiService');
+const geminiClient = require('../services/geminiClient');
 
 /**
  * NEW: Generates a BRD using Gemini AI based on user template and data
@@ -21,27 +19,35 @@ exports.generateBRD = async (req, res) => {
     }
 
     // 2. Prepare the prompt for Gemini
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const templateInstructions = aiService.getTemplateInstructions(templateType);
+
+    // Extract text context from any uploaded documents (if they were sent alongside)
+    let documentContext = '';
+    if (project.dataSources && project.dataSources.uploads && project.dataSources.uploads.length > 0) {
+      documentContext = '\n--- Uploaded Document Context ---\n';
+      project.dataSources.uploads.forEach((file, index) => {
+        if (file.extractedText) {
+          documentContext += `\nDocument ${index + 1} (${file.originalname}):\n${file.extractedText.substring(0, 15000)}\n`;
+        }
+      });
+      documentContext += '\n--- End of Document Context ---\n';
+    }
+
     const prompt = `
       Act as an expert Business Analyst. Generate a professional ${templateType} 
       Business Requirements Document (BRD) based on this input:
       
       "${initialData}"
       
-      Please include the following sections:
-      - Executive Summary
-      - Project Objectives
-      - User Stories
-      - Functional & Non-Functional Requirements
-      - Technical Constraints
+      ${documentContext}
+
+      ${templateInstructions}
       
-      Format the output in clear Markdown.
+      Format the output in clear Markdown ONLY. Do not wrap it in a JSON block. Just provide the raw markdown text.
     `;
 
     // 3. Call Gemini API
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const generatedContent = response.text();
+    const generatedContent = await geminiClient.executeWithRetry(prompt, "gemini-1.5-flash");
 
     // 4. Save or Update the BRD in MongoDB
     const brd = await BRD.findOneAndUpdate(

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Download, FileText, Copy, Check } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import toast from 'react-hot-toast'
 import api from '../../api/axios'
 
@@ -85,7 +86,7 @@ export default function BRDPreview({ brd, projectId }) {
       <div className="flex-1 min-h-0 p-8 text-gray-300 relative z-10 overflow-y-auto custom-scrollbar">
         {brd && brd.content ? (
           <div className="prose prose-invert prose-neon max-w-none">
-            <ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {typeof brd.content === 'string' ? brd.content : JSON.stringify(brd.content, null, 2)}
             </ReactMarkdown>
 

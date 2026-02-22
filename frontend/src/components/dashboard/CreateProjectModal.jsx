@@ -21,6 +21,8 @@ export default function CreateProjectModal({ onClose, onSuccess }) {
   const [templateType, setTemplateType] = useState('comprehensive')
   const [initialData, setInitialData] = useState('')
   const [loading, setLoading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const fileInputRef = React.useRef(null)
   const navigate = useNavigate()
 
   const templates = [
@@ -113,37 +115,19 @@ Cost-Benefit Analysis:
 Estimated initial software and integration cost: $85,000. Expected annual savings from reduced holding costs and recovered lost sales: $240,000. ROI expected within 5 months post-launch.`;
 
     } else {
-      demoText = `Global Enterprise Microservices Migration (Project: Phoenix)
+      demoText = `We are initiating Project Phoenix, a strategic overhaul of our core banking monolith at "FinTech Global" aiming to migrate to a highly scalable, cloud-native microservices architecture on AWS. Our lead investor, Orion Capital Partners, recently infused $15 million following a 3-for-1 stock split, accelerating our timeline. We must have the new ledger systems operational by the end of Q4 (December 31st).
 
-Overview:
-"FinTech Global" currently operates a monolithic banking application handling 2 million daily transactions. The legacy architecture, built on a single massive SQL database and tightly coupled application servers, is impeding our ability to release new features quickly. We are initiating "Project Phoenix" to migrate our core banking, user profile, and transaction ledgers to a cloud-native, microservices architecture on AWS.
+The current monolithic application handles 2 million daily transactions but suffers from unacceptable latency during peak trading hours. By breaking the system into discrete microservices (User Profiles, Real-Time Ledger, and Payment Gateway) using containerized deployments, we anticipate reducing average response times by 40% while ensuring 99.99% uptime. 
 
-Governance & Oversight:
-The project will be governed by the Enterprise Architecture Review Board (EARB). All architectural decisions, API contracts, and database splits must be documented in Confluence and receive formal sign-off from the Chief Information Security Officer (CISO) and the VP of Engineering. Weekly steering committee meetings will track progress against the $5.2M allocated budget.
-
-Regulatory Compliance:
-As a financial institution, the new architecture must maintain strict compliance with PCI-DSS for payment processing and GDPR/CCPA for user data privacy. Data masking must be explicitly implemented for all non-production environments. The system must support immutable audit logging for every ledger transaction, retaining logs in Amazon S3 standard-IA for 7 years to satisfy SEC regulations.
-
-Security Protocols:
-Zero Trust networking must be applied between all microservices using a service mesh (e.g., Istio). Service-to-service communication will occur exclusively over mutual TLS (mTLS). An API Gateway will handle all external ingress, strictly enforcing OAuth 2.0 with JWT tokens. Rate limiting and Web Application Firewalls (WAF) must be configured to prevent DDoS attacks.
-
-Risk Mitigation:
-- Risk 1 (Downtime): We cannot afford a "big bang" release. Mitigation: Implement the Strangler Fig pattern. We will route 5% of traffic to the new microservices, validate, and incrementally increase.
-- Risk 2 (Data Inconsistency): Dual-writing between the legacy monolithic DB and the new distributed databases could lead to race conditions. Mitigation: Use Event Sourcing and an event bus (Kafka) to ensure eventual consistency, heavily monitored by Datadog.
-
-Data Migration Plan:
-Phase 1 involves migrating static reference data (e.g., branch locations, fee structures). Phase 2 involves migrating active User Profiles. We will perform offline bulk extracts, sanitization, and loads into Amazon DynamoDB. The final phase involves the highly complex ledger data, which requires a real-time CDC (Change Data Capture) pipeline using Debezium to keep the legacy and new systems perfectly synchronized until the cutover.
-
-Vendor Requirements:
-We require AWS Enterprise Support. Furthermore, the migration of the ledger database requires specialized consultants. We will issue an RFP for an implementation partner with proven experience in banking microservices, requiring a minimum of three relevant case studies and SOC2 Type II certification.`;
+Our main constraints are a hard budget of $5.2M, and the fact that we cannot experience any downtime during the transition, necessitating a Strangler Fig deployment pattern. The Enterprise Architecture Review Board requires strict adherence to PCI-DSS compliance and Zero-Trust mutual TLS across the service mesh. Key stakeholders driving this include our CISO, Sarah Jenkins, who oversees the security audits, and VP of Engineering, David Chen, who is managing the AWS infrastructure rollout. This system is critical for our Q1 roadmap, and any delays will breach our SLAs with our institutional clients.`;
     }
 
     setInitialData(demoText);
   }
 
   const handleLetsGo = async () => {
-    if (!initialData.trim()) {
-      toast.error('Please describe your project first')
+    if (!initialData.trim() && !selectedFile) {
+      toast.error('Please describe your project or upload context first')
       return
     }
 
@@ -151,7 +135,8 @@ We require AWS Enterprise Support. Furthermore, the migration of the ledger data
 
     try {
       // 1. Create a quick project entry
-      const projectName = initialData.split(' ').slice(0, 4).join(' ') + '...';
+      const rawName = initialData ? initialData.split(' ').slice(0, 4).join(' ') : (selectedFile ? selectedFile.name : 'New Project');
+      const projectName = rawName + '...';
       const projectResponse = await api.post('/api/projects', {
         name: projectName,
         description: 'Generated from initial context',
@@ -160,11 +145,27 @@ We require AWS Enterprise Support. Furthermore, the migration of the ledger data
 
       const projectId = projectResponse.data.project._id
 
+      // 1.5. Upload file if selected
+      if (selectedFile) {
+        const formData = new FormData()
+        formData.append('files', selectedFile)
+        formData.append('projectId', projectId)
+        try {
+          await api.post('/api/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          })
+          toast.success('Context uploaded successfully')
+        } catch (uploadError) {
+          toast.error('Failed to upload document context, continuing...')
+          console.error(uploadError)
+        }
+      }
+
       // 2. Trigger Gemini to generate the initial BRD
       await api.post(`/api/brd/${projectId}/generate`, {
         projectId,
         templateType,
-        initialData
+        initialData: initialData || '[Context sourced from uploaded document]'
       })
 
       toast.success('Project and BRD generated successfully!')
@@ -232,8 +233,18 @@ We require AWS Enterprise Support. Furthermore, the migration of the ledger data
 
               <div className="flex flex-wrap gap-4 items-center mb-6">
                 {/* Functional Buttons */}
-                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-white/10 hover:text-white transition-all text-sm font-medium">
-                  <Upload className="w-4 h-4" /> Upload Context
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                  accept=".txt,.pdf,.doc,.docx"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex items-center gap-2 px-4 py-2 ${selectedFile ? 'bg-neonGreen/10 border-neonGreen/20 text-neonGreen' : 'bg-white/5 border-white/10 text-gray-300'} rounded-lg hover:bg-white/10 hover:text-white transition-all text-sm font-medium`}
+                >
+                  <Upload className="w-4 h-4" /> {selectedFile ? selectedFile.name : 'Upload Context'}
                 </button>
                 <button
                   onClick={handleDemoData}
