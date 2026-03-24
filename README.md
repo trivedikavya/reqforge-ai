@@ -4,7 +4,7 @@
 
 ReqForge AI automatically generates comprehensive Business Requirements Documents (BRDs) by analyzing context, notes, and uploaded documents using advanced generative AI. 
 
-## 🚀 Features
+## Features
 
 - **AI-Powered Generation**: Leverages Google Gemini 1.5 Flash for rapid, accurate requirement extraction and formatting.
 - **Multiple Templates**: Produce documents in Comprehensive, Standard, and Agile Quick-Start formats.
@@ -13,14 +13,14 @@ ReqForge AI automatically generates comprehensive Business Requirements Document
 - **Web Scraping**: Enriches BRDs with live competitive market intelligence.
 - **Live Preview & Export**: Instantly preview markdown output and export directly to PDF and DOCX.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React + Vite + Tailwind CSS + Framer Motion
 - **Backend**: Node.js + Express + MongoDB
 - **AI Services**: Google Generative AI (Gemini Flash)
 - **Real-time**: Socket.io WebSockets
 
-## 📦 Installation & Setup
+## Installation & Setup
 
 1. **Clone the repository**
 ```bash
@@ -52,7 +52,7 @@ cd ../frontend
 npm install
 ```
 
-## 🏃‍♂️ Running the Application
+## Running the Application
 
 You will need to run both the frontend and backend servers concurrently.
 
@@ -67,7 +67,7 @@ npm run dev
 ```
 The application will be available at `http://localhost:3000`.
 
-## 🎯 Usage Workflow
+## Usage Workflow
 
 1. **Register/Login** to your workspace.
 2. **Create New Project** and select your desired framework (Comprehensive, Standard, Agile).
@@ -76,6 +76,3 @@ The application will be available at `http://localhost:3000`.
 5. **Chat with the AI Architect** in the split-view workspace to request modifications, resolve conflicts, or add metrics.
 6. **Export** the final, polished document as PDF or DOCX.
 
-## 📄 License
-
-MIT License - see LICENSE file
