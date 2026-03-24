@@ -1,5 +1,12 @@
 # ReqForge AI - Intelligent BRD Generator
 
+---
+
+<img width="1600" height="748" alt="image" src="https://github.com/user-attachments/assets/1f4b4e6d-c6d5-4f21-b0ae-950b506d8e76" />
+
+---
+<img width="1600" height="762" alt="image" src="https://github.com/user-attachments/assets/7ba37e4b-19ed-493c-8d16-463a89823e34" />
+
 **From Chaos to Clarity in Minutes**
 
 ReqForge AI automatically generates comprehensive Business Requirements Documents (BRDs) by analyzing context, notes, and uploaded documents using advanced generative AI. 
